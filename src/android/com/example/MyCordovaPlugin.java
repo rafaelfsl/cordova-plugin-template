@@ -138,4 +138,15 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
       Log.i(TAG, "GoogleApiClient built");
   }
 
+  /**
+     * Handles failure in connecting to google apis.
+     *
+     * @param result is the ConnectionResult to potentially catch
+     */
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        Log.i(TAG, "Unresolvable failure in connecting to Google APIs");
+        savedCallbackContext.error(result.getErrorCode());
+    }
+
 }
