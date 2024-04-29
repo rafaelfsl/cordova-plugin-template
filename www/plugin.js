@@ -10,8 +10,8 @@ var MyCordovaPlugin = {
   getDate: function(cb) {
     exec(cb, null, PLUGIN_NAME, 'getDate', []);
   },
-  googleSign: function(cb) {
-    exec(cb, null, PLUGIN_NAME, 'googleSign', []);
+  googleSign: function(clientOptions, cb, errorCb) {
+    exec(cb, errorCb, PLUGIN_NAME, 'googleSign', [clientOptions]);
   }
 };
 
