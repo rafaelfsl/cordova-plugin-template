@@ -149,6 +149,7 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
 
       // if webClientId included, we'll request an idToken
       if (webClientId != null && !webClientId.isEmpty()) {
+        Log.d(TAG, " >>>>>> webClientId = " + webClientId);
         gso.requestServerAuthCode(webClientId);
           // gso.requestIdToken(webClientId);
 
