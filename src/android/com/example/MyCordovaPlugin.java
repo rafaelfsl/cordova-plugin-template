@@ -32,10 +32,16 @@ import java.util.Date;
 public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.OnConnectionFailedListener {
   private static final String TAG = "MyCordovaPlugin";
 
+  private final static String FIELD_ACCESS_TOKEN      = "accessToken";
+  private final static String FIELD_TOKEN_EXPIRES     = "expires";
+  private final static String FIELD_TOKEN_EXPIRES_IN  = "expires_in";
+
   public static final String ARGUMENT_WEB_CLIENT_ID = "webClientId";
   public static final String ARGUMENT_SCOPES = "scopes";
   public static final String ARGUMENT_OFFLINE_KEY = "offline";
   public static final String ARGUMENT_HOSTED_DOMAIN = "hostedDomain";
+
+  public static final int RC_GOOGLEPLUS = 1552; // Request Code to identify our plugin's activities
 
   // Wraps our service connection to Google Play services and provides access to the users sign in state and Google APIs
   private GoogleApiClient mGoogleApiClient;
@@ -64,8 +70,10 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
 
       // Tries to Log the user in
       Log.d(TAG, "Trying to Log in!");
-      // cordova.setActivityResultCallback(this); //sets this class instance to be an activity result listener
-      // signIn();
+      cordova.setActivityResultCallback(this); //sets this class instance to be an activity result listener
+      Log.d(TAG, "Activity result set");
+      signIn();
+      Log.d(TAG, "Signin executed");
     }
     return true;
   }
@@ -148,5 +156,111 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
         Log.i(TAG, "Unresolvable failure in connecting to Google APIs");
         savedCallbackContext.error(result.getErrorCode());
     }
+
+    /**
+     * Starts the sign in flow with a new Intent, which should respond to our activity listener here.
+     */
+    private void signIn() {
+      Log.d(TAG, "Starting intent");
+      Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(this.mGoogleApiClient);
+      Log.d(TAG, "Start activity for result from intent");
+      cordova.getActivity().startActivityForResult(signInIntent, RC_GOOGLEPLUS);
+      Log.d(TAG, "Start activity done");
+    }
+
+    /**
+     * Listens for and responds to an activity result. If the activity result request code matches our own,
+     * we know that the sign in Intent that we started has completed.
+     *
+     * The result is retrieved and send to the handleSignInResult function.
+     *
+     * @param requestCode The request code originally supplied to startActivityForResult(),
+     * @param resultCode The integer result code returned by the child activity through its setResult().
+     * @param intent Information returned by the child activity
+     */
+    @Override
+    public void onActivityResult(int requestCode, final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        Log.i(TAG, "In onActivityResult");
+
+        if (requestCode == RC_GOOGLEPLUS) {
+            Log.i(TAG, "One of our activities finished up");
+            //Call handleSignInResult passing in sign in result object
+            handleSignInResult(Auth.GoogleSignInApi.getSignInResultFromIntent(intent));
+        }
+        else {
+            Log.i(TAG, "This wasn't one of our activities");
+        }
+    }
+
+    /**
+     * Function for handling the sign in result
+     * Handles the result of the authentication workflow.
+     *
+     * If the sign in was successful, we build and return an object containing the users email, id, displayname,
+     * id token, and (optionally) the server authcode.
+     *
+     * If sign in was not successful, for some reason, we return the status code to web app to be handled.
+     * Some important Status Codes:
+     *      SIGN_IN_CANCELLED = 12501 -> cancelled by the user, flow exited, oauth consent denied
+     *      SIGN_IN_FAILED = 12500 -> sign in attempt didn't succeed with the current account
+     *      SIGN_IN_REQUIRED = 4 -> Sign in is needed to access API but the user is not signed in
+     *      INTERNAL_ERROR = 8
+     *      NETWORK_ERROR = 7
+     *
+     * @param signInResult - the GoogleSignInResult object retrieved in the onActivityResult method.
+     */
+    private void handleSignInResult(final GoogleSignInResult signInResult) {
+      if (this.mGoogleApiClient == null) {
+          savedCallbackContext.error("GoogleApiClient was never initialized");
+          return;
+      }
+
+      if (signInResult == null) {
+        savedCallbackContext.error("SignInResult is null");
+        return;
+      }
+
+      Log.d(TAG, "Handling SignIn Result");
+
+      if (!signInResult.isSuccess()) {
+          Log.d(TAG, "Wasn't signed in " + signInResult.getStatus().getStatusCode());
+
+          //Return the status code to be handled client side
+          savedCallbackContext.error(signInResult.getStatus().getStatusCode());
+      } else {
+          new AsyncTask<Void, Void, Void>() {
+              @Override
+              protected Void doInBackground(Void... params) {
+                  GoogleSignInAccount acct = signInResult.getSignInAccount();
+
+                  Log.d(TAG, " >>>>>> data???? " + acct.getDisplayName() + " ?/// " + acct.getEmail());
+
+                  JSONObject result = new JSONObject();
+                  try {
+                      JSONObject accessTokenBundle = getAuthToken(
+                          cordova.getActivity(), acct.getAccount(), true
+                      );
+                      result.put(FIELD_ACCESS_TOKEN, accessTokenBundle.get(FIELD_ACCESS_TOKEN));
+                      result.put(FIELD_TOKEN_EXPIRES, accessTokenBundle.get(FIELD_TOKEN_EXPIRES));
+                      result.put(FIELD_TOKEN_EXPIRES_IN, accessTokenBundle.get(FIELD_TOKEN_EXPIRES_IN));
+                      result.put("email", acct.getEmail());
+                      result.put("idToken", acct.getIdToken());
+                      result.put("serverAuthCode", acct.getServerAuthCode());
+                      result.put("userId", acct.getId());
+                      result.put("displayName", acct.getDisplayName());
+                      result.put("familyName", acct.getFamilyName());
+                      result.put("givenName", acct.getGivenName());
+                      result.put("imageUrl", acct.getPhotoUrl());
+                      savedCallbackContext.success(result);
+                  } catch (Exception e) {
+                      savedCallbackContext.error("Trouble obtaining result, error: " + e.getMessage());
+                  }
+                  return null;
+              }
+          }.execute();
+      }
+  }
 
 }
