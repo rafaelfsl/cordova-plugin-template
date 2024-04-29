@@ -32,6 +32,11 @@ import java.util.Date;
 public class MyCordovaPlugin extends CordovaPlugin {
   private static final String TAG = "MyCordovaPlugin";
 
+  public static final String ARGUMENT_WEB_CLIENT_ID = "webClientId";
+  public static final String ARGUMENT_SCOPES = "scopes";
+  public static final String ARGUMENT_OFFLINE_KEY = "offline";
+  public static final String ARGUMENT_HOSTED_DOMAIN = "hostedDomain";
+
   // Wraps our service connection to Google Play services and provides access to the users sign in state and Google APIs
   private GoogleApiClient mGoogleApiClient;
   private CallbackContext savedCallbackContext;
