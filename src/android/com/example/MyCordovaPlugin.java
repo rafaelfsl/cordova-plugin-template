@@ -250,7 +250,7 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
       Log.d(TAG, "Handling SignIn Result");
 
       if (!signInResult.isSuccess()) {
-          Log.d(TAG, "Wasn't signed in " + signInResult.getStatus().getStatusCode());
+          Log.d(TAG, "Wasn't signed in " + signInResult.getStatus().getStatusMessage() + " //// " + signInResult.getStatus().getStatusCode());
 
           //Return the status code to be handled client side
           savedCallbackContext.error(signInResult.getStatus().getStatusCode());
