@@ -1,6 +1,6 @@
 /**
  */
-package com.example;
+package br.com.britannica.escola;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
