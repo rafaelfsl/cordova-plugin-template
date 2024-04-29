@@ -34,6 +34,21 @@ import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import java.util.Date;
 
@@ -286,6 +301,36 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
             throw e;
         }
     }
-}
+  }
+
+  private JSONObject verifyToken(String authToken) throws IOException, JSONException {
+    URL url = new URL(VERIFY_TOKEN_URL+authToken);
+    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+    urlConnection.setInstanceFollowRedirects(true);
+    String stringResponse = fromStream(
+        new BufferedInputStream(urlConnection.getInputStream())
+    );
+    /* expecting:
+    {
+        "issued_to": "608941808256-43vtfndets79kf5hac8ieujto8837660.apps.googleusercontent.com",
+        "audience": "608941808256-43vtfndets79kf5hac8ieujto8837660.apps.googleusercontent.com",
+        "user_id": "107046534809469736555",
+        "scope": "https://www.googleapis.com/auth/userinfo.profile",
+        "expires_in": 3595,
+        "access_type": "offline"
+    }*/
+
+    Log.d("AuthenticatedBackend", "token: " + authToken + ", verification: " + stringResponse);
+    JSONObject jsonResponse = new JSONObject(
+        stringResponse
+    );
+    int expires_in = jsonResponse.getInt(FIELD_TOKEN_EXPIRES_IN);
+    if (expires_in < KAssumeStaleTokenSec) {
+        throw new IOException("Auth token soon expiring.");
+    }
+    jsonResponse.put(FIELD_ACCESS_TOKEN, authToken);
+    jsonResponse.put(FIELD_TOKEN_EXPIRES, expires_in + (System.currentTimeMillis()/1000));
+    return jsonResponse;
+  }
 
 }
