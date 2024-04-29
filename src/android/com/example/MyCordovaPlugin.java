@@ -335,4 +335,15 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
     return jsonResponse;
   }
 
+  public static String fromStream(InputStream is) throws IOException {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    StringBuilder sb = new StringBuilder();
+    String line = null;
+    while ((line = reader.readLine()) != null) {
+        sb.append(line).append("\n");
+    }
+    reader.close();
+    return sb.toString();
+  }
+
 }
