@@ -19,7 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
+// import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.api.Scope;
 
 import org.apache.cordova.*;
@@ -29,7 +29,7 @@ import android.util.Log;
 
 import java.util.Date;
 
-public class MyCordovaPlugin extends CordovaPlugin {
+public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.OnConnectionFailedListener {
   private static final String TAG = "MyCordovaPlugin";
 
   public static final String ARGUMENT_WEB_CLIENT_ID = "webClientId";
