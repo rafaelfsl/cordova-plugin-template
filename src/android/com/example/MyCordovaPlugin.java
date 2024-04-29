@@ -58,6 +58,7 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
   private final static String FIELD_ACCESS_TOKEN      = "accessToken";
   private final static String FIELD_TOKEN_EXPIRES     = "expires";
   private final static String FIELD_TOKEN_EXPIRES_IN  = "expires_in";
+  private final static String VERIFY_TOKEN_URL        = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=";
 
   public static final String ARGUMENT_WEB_CLIENT_ID = "webClientId";
   public static final String ARGUMENT_SCOPES = "scopes";
@@ -65,6 +66,7 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
   public static final String ARGUMENT_HOSTED_DOMAIN = "hostedDomain";
 
   public static final int RC_GOOGLEPLUS = 1552; // Request Code to identify our plugin's activities
+  public static final int KAssumeStaleTokenSec = 60;
 
   // Wraps our service connection to Google Play services and provides access to the users sign in state and Google APIs
   private GoogleApiClient mGoogleApiClient;
