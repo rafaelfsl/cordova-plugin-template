@@ -26,6 +26,14 @@ import org.apache.cordova.*;
 import org.apache.cordova.engine.SystemWebChromeClient;
 
 import android.util.Log;
+import android.content.Intent;
+import android.os.AsyncTask;
+
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 
 import java.util.Date;
 
@@ -262,5 +270,22 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
           }.execute();
       }
   }
+
+  private JSONObject getAuthToken(Activity activity, Account account, boolean retry) throws Exception {
+    AccountManager manager = AccountManager.get(activity);
+    AccountManagerFuture<Bundle> future = manager.getAuthToken(account, "oauth2:profile email", null, activity, null, null);
+    Bundle bundle = future.getResult();
+    String authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+    try {
+        return verifyToken(authToken);
+    } catch (IOException e) {
+        if (retry) {
+            manager.invalidateAuthToken("com.google", authToken);
+            return getAuthToken(activity, account, false);
+        } else {
+            throw e;
+        }
+    }
+}
 
 }
