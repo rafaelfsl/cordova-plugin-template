@@ -90,6 +90,8 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
     } else if(action.equals("googleSign")) {
       Log.d(TAG, "Trying to build google client api");
 
+      Log.d(TAG, "  >>>>>>> input json " + args.optJSONObject(0).toString());
+
       //pass args into api client build
       buildGoogleApiClient(args.optJSONObject(0));
 
@@ -108,6 +110,8 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
      * @param clientOptions - the options object passed in the login function
      */
     private synchronized void buildGoogleApiClient(JSONObject clientOptions) throws JSONException {
+      Log.d(TAG, " >>>>>> buildGoogleApiClient " + clientOptions.toString()); 
+
       if (clientOptions == null) {
           return;
       }
