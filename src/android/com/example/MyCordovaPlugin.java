@@ -79,6 +79,8 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
   }
 
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    this.savedCallbackContext = callbackContext;
+    
     if(action.equals("echo")) {
       String phrase = args.getString(0);
       // Echo back the first argument
