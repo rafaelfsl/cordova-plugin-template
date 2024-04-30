@@ -150,13 +150,13 @@ public class MyCordovaPlugin extends CordovaPlugin implements GoogleApiClient.On
       // if webClientId included, we'll request an idToken
       if (webClientId != null && !webClientId.isEmpty()) {
         Log.d(TAG, " >>>>>> webClientId = " + webClientId);
-        gso.requestServerAuthCode(webClientId);
-          // gso.requestIdToken(webClientId);
+        // gso.requestServerAuthCode(webClientId);
+          gso.requestIdToken(webClientId);
 
-          // // if webClientId is included AND offline is true, we'll request the serverAuthCode
-          // if (clientOptions.optBoolean(ARGUMENT_OFFLINE_KEY, false)) {
-          //     gso.requestServerAuthCode(webClientId, true);
-          // }
+          // if webClientId is included AND offline is true, we'll request the serverAuthCode
+          if (clientOptions.optBoolean(ARGUMENT_OFFLINE_KEY, false)) {
+              gso.requestServerAuthCode(webClientId, true);
+          }
       }
 
       // Try to get hosted domain
